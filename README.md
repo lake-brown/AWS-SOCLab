@@ -21,6 +21,10 @@ To solve this, **AWS provides a NAT Gateway**, which allows outbound internet tr
 
 ---
 
+![AWS LAB drawio](https://github.com/user-attachments/assets/68513e1a-029e-4dc6-8304-db7e111c3c33)
+
+---
+
 ## Step-by-Step Setup
 
 ### 1. Create a VPC
