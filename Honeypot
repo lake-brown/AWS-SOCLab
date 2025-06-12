@@ -1,0 +1,133 @@
+🛡️ AWS Cybersecurity Lab with Bastion Host and Cowrie Honeypot
+
+This project sets up a secure AWS cybersecurity lab with:
+
+A Bastion Host (jump server) for controlled SSH access into private subnets
+
+A Cowrie Honeypot running on a private EC2 instance to simulate a vulnerable system for attack logging and analysis
+
+📐 Architecture Overview
+
+[Internet]
+    |
+  [Bastion EC2] (Public Subnet)
+    |
+ [Private Subnet]
+    ├── [Cowrie Honeypot EC2] (no public IP)
+
+Bastion Host: Acts as the only entry point for SSH access, preventing direct public access to sensitive machines
+
+Honeypot (Cowrie): Simulates a vulnerable SSH service to attract and log malicious behavior
+
+🔨 Lab Setup Details
+
+VPC Setup (from initial AWS script):
+
+1 VPC with:
+
+Public subnet (for Bastion EC2)
+
+Private subnet (for Honeypot EC2)
+
+NAT Gateway to allow outbound internet access from the private subnet
+
+New Components Added:
+
+Bastion Host EC2 in public subnet
+
+Ubuntu AMI
+
+Inbound: SSH (port 22) from your IP
+
+Outbound: All traffic to private subnet
+
+Cowrie Honeypot EC2 in private subnet
+
+Ubuntu AMI
+
+Inbound: SSH (port 2222) from Bastion Host security group only
+
+No public IP
+
+🧩 Step-by-Step: Adding Bastion Host
+
+1. Create Bastion EC2 Instance
+
+Use Ubuntu Server 22.04
+
+Place it in the public subnet
+
+Allow SSH from your IP only (port 22)
+
+2. Create Security Group for Bastion
+
+Inbound:
+
+SSH (22) from your_ip/32
+
+Outbound:
+
+All traffic (or restrict to the private subnet CIDR block)
+
+3. SSH Into Bastion
+
+ssh -i your-key.pem ubuntu@<bastion-public-ip>
+
+4. Create Security Group for Cowrie EC2
+
+Inbound:
+
+TCP 2222 from Bastion security group
+
+Outbound:
+
+Allow internet (or use NAT Gateway)
+
+5. SSH Into Cowrie from Bastion
+
+ssh ubuntu@<honeypot-private-ip> -p 2222
+
+🐍 Cowrie Honeypot Setup (Private EC2)
+
+sudo apt update && sudo apt install git python3-venv -y
+git clone https://github.com/cowrie/cowrie
+cd cowrie
+python3 -m venv cowrie-env
+source cowrie-env/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+cp etc/cowrie.cfg.dist etc/cowrie.cfg
+bin/cowrie start
+
+To view logs:
+
+cd var/log/cowrie
+tail -f cowrie.log
+
+🔐 Optional Security Group Rule
+
+To further restrict Bastion access:
+
+Create a Network ACL or Security Group rule that limits egress from Bastion EC2 only to port 2222 on the honeypot's private IP.
+
+📈 Future Enhancements
+
+✅ Integrate Security Onion for network traffic monitoring
+
+✅ Forward Cowrie logs to ELK Stack or Splunk
+
+✅ Add an attacker VM in private subnet for red team exercises
+
+💼 Why This Matters
+
+This lab demonstrates:
+
+Secure VPC design with public/private subnet separation
+
+Controlled access using a Bastion host
+
+Threat detection via Cowrie honeypot
+
+Realistic SOC environment simulation
+
+
